@@ -66,3 +66,31 @@ get_latest_docker_image_version() {
     echo "${latest_version}"
     return 0
 }
+
+increment_version() {
+  local version="$1"
+  local flag="$2"
+
+  IFS='.' read -r -a parts <<< "$version"
+
+  case $flag in
+    major)
+      ((parts[0]++))
+      parts[1]=0
+      parts[2]=0
+      ;;
+    minor)
+      ((parts[1]++))
+      parts[2]=0
+      ;;
+    bug)
+      ((parts[2]++))
+      ;;
+    *)
+      echo "Invalid flag. Use 'major', 'minor', or 'bug'."
+      return 1
+      ;;
+  esac
+
+  echo "${parts[0]}.${parts[1]}.${parts[2]}"
+}
