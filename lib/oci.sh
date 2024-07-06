@@ -25,7 +25,12 @@ get_latest_docker_image_version() {
             fi
              
             # Artifactory API to get tags
-            tags=$(curl -s "${artifactory_base_url}/api/docker/${repo_id}/v2/${image_name}/tags/list" | jq -r '.tags | .[]')
+            tags_list=$(curl -s "${artifactory_base_url}/api/docker/${repo_id}/v2/${image_name}/tags/list")
+            if [ $? -ne 0 ]; then
+                echo "Error: Failed to fetch tags for image ${image_name}."
+                return 1
+            fi
+            tags=$(echo "$tags_list" | jq -r '.tags | .[]')
             ;;
         harbor)
             if [[ -z "${harbor_base_url}" ]]; then
