@@ -6,9 +6,8 @@ get_latest_docker_image_version() {
     local repo_id="$2"
     local image_name="$3"
     local artifactory_base_url="$4"
-    local harbor_base_url="$5"
-    local R_USER="$6"
-    local R_PASS="$7"
+    local R_USER="$5"
+    local R_PASS="$6"
     
     if [[ -z "${repo_type}" || -z "${image_name}" ]]; then
         echo "Usage: get_latest_docker_image_version <repo_id> <repo_type> <image_name> [<artifactory_url>|<harbor_url>]"
@@ -40,10 +39,6 @@ get_latest_docker_image_version() {
             tags=$(echo "$tags_list" | jq -r '.tags | .[]')
             ;;
         harbor)
-            if [[ -z "${harbor_base_url}" ]]; then
-                echo "Error: Harbor base URL is required for Harbor repository."
-                return 1
-            fi
             # Harbor API to get tags
             tags_list=$(curl -s -X 'GET' \
                 "${artifactory_base_url}/api/v2.0/projects/${repo_id}/repositories/$(printf %s "$image_name" | jq -sRr @uri)/artifacts" \
