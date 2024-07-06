@@ -301,7 +301,7 @@ regex_user_input() {
 yes_no() {
     local  __resultvar=$1
     OPTIONS_STRING=("Yes;No;")
-    question "$2"
+    echo "${c_cyan}$2${c_reset}"
     if [ ! -z $3 ]; then set +Ee; fi
     prompt_for_select SELECTED "$OPTIONS_STRING"
     if [ ! -z $3 ]; then set -Ee; fi
