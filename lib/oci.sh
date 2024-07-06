@@ -46,7 +46,7 @@ get_latest_docker_image_version() {
             fi
             # Harbor API to get tags
             tags_list=$(curl -s -X 'GET' \
-                "${artifactory_base_url}/api/v2.0/projects/${repo_id}/repositories/${image_name}/artifacts" \
+                "${artifactory_base_url}/api/v2.0/projects/${repo_id}/repositories/$(printf %s "$image_name" | jq -sRr @uri)/artifacts" \
                 -H 'accept: application/json' \
                 -H 'X-Accept-Vulnerabilities: application/vnd.security.vulnerability.report; version=1.1, application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0' \
                 -u "$R_USER:$R_PASS" | jq '.[]')
