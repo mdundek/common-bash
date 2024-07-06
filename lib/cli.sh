@@ -13,6 +13,11 @@ if [ ! -z $TERM ] && [ "$TERM" != "dumb" ]; then
     fi
 fi
 
+print_section_title() {
+    echo "${c_cyan}$1${c_reset}"
+    echo "${c_cyan}-------------------------------------${c_reset}"
+}
+
 # #############################
 # MULTISELECT
 # #############################
