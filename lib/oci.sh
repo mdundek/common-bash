@@ -7,6 +7,8 @@ get_latest_docker_image_version() {
     local image_name="$3"
     local artifactory_base_url="$4"
     local harbor_base_url="$5"
+    local R_USER="$6"
+    local R_PASS="$7"
     
     if [[ -z "${repo_type}" || -z "${image_name}" ]]; then
         echo "Usage: get_latest_docker_image_version <repo_id> <repo_type> <image_name> [<artifactory_url>|<harbor_url>]"
@@ -30,7 +32,7 @@ get_latest_docker_image_version() {
             fi
              
             # Artifactory API to get tags
-            tags_list=$(curl -s "${artifactory_base_url}/api/docker/${repo_id}/v2/${image_name}/tags/list")
+            tags_list=$(curl -s -u "$R_USER:$R_PASS" "${artifactory_base_url}/api/docker/${repo_id}/v2/${image_name}/tags/list")
             if [ "$(echo "$tags_list" | jq '.errors')" != "null" ]; then
                 echo "Error: Failed to fetch tags for image ${image_name}."
                 return 1
@@ -43,7 +45,16 @@ get_latest_docker_image_version() {
                 return 1
             fi
             # Harbor API to get tags
-            tags=$(curl -s -u "username:password" "${harbor_base_url}/api/v2.0/projects/library/repositories/${image_name}/artifacts" | jq -r '.[].tags[].name')
+            tags_list=$(curl -s -X 'GET' \
+                "${artifactory_base_url}/api/v2.0/projects/${repo_id}/repositories/${image_name}/artifacts" \
+                -H 'accept: application/json' \
+                -H 'X-Accept-Vulnerabilities: application/vnd.security.vulnerability.report; version=1.1, application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0' \
+                -u "$R_USER:$R_PASS" | jq '.[]')
+            if [ -z "$tags_list" ]; then
+                echo "Error: Failed to fetch tags for image ${image_name}."
+                return 1
+            fi
+            tags=$(echo "$tags_list" | jq -r '.tags[].name')
             ;;
         *)
             echo "Error: Invalid repository type. Valid types are docker_hub, artifactory, harbor."
