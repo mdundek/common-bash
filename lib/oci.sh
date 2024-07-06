@@ -54,4 +54,5 @@ get_latest_docker_image_version() {
     fi
 
     echo "${latest_version}"
+    return 0
 }
