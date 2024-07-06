@@ -16,7 +16,12 @@ get_latest_docker_image_version() {
     case "${repo_type}" in
         docker_hub)
             # Docker Hub API to get tags
-            tags=$(curl -s "https://registry.hub.docker.com/v2/repositories/${image_name}/tags/?page_size=100" | jq -r '.results[].name')
+            tags_list=$(curl -s "https://registry.hub.docker.com/v2/repositories/${image_name}/tags/?page_size=100")
+            if [ "$(echo "$tags_list" | jq '.message')" != "null" ]; then
+                echo "Error: Failed to fetch tags for image ${image_name}."
+                return 1
+            fi
+            tags=$(echo "$tags_list" | jq -r '.results[].name')
             ;;
         artifactory)
             if [[ -z "${artifactory_base_url}" ]]; then
@@ -26,7 +31,7 @@ get_latest_docker_image_version() {
              
             # Artifactory API to get tags
             tags_list=$(curl -s "${artifactory_base_url}/api/docker/${repo_id}/v2/${image_name}/tags/list")
-            if [ $? -ne 0 ]; then
+            if [ "$(echo "$tags_list" | jq '.errors')" != "null" ]; then
                 echo "Error: Failed to fetch tags for image ${image_name}."
                 return 1
             fi
